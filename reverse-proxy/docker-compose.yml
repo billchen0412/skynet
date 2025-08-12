@@ -15,6 +15,7 @@ services:
       - ./nginx/start.sh:/start.sh:ro
       - letsencrypt:/etc/letsencrypt
       - certbot-web:/var/www/certbot
+    command: ["/bin/sh", "/start.sh"]
 
   # Run this to obtain/renew certificates (invoke manually or via host cron)
   certbot:
