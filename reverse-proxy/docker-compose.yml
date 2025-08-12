@@ -9,7 +9,10 @@ services:
     networks:
       - skynet_network
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/templates:/etc/nginx/templates:ro
+      - ./nginx/routes.map:/etc/nginx/routes.map:ro
+      - ./nginx/start.sh:/start.sh:ro
       - letsencrypt:/etc/letsencrypt
       - certbot-web:/var/www/certbot
 
@@ -22,11 +25,6 @@ services:
     volumes:
       - letsencrypt:/etc/letsencrypt
       - certbot-web:/var/www/certbot
-    # First-time: replace email + domain below, run once:
-    # docker compose run --rm certbot certonly --webroot -w /var/www/certbot \
-    #   -d cloud.cisc.tw -d cisc.tw --email billchen0412@gmail.com --agree-tos --non-interactive
-    entrypoint: sh
-    command: -c "echo 'Run certbot commands manually as shown in compose comments.' && sleep 3600"
 
 networks:
   skynet_network:

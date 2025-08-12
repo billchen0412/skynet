@@ -4,16 +4,14 @@ events {
 
 http {
     # Redirect HTTP -> HTTPS
-    server {
+        server {
         listen 80;
         listen [::]:80;
-        server_name cloud.cisc.tw;
+        server_name __DOMAIN__;
 
-        # Let’s Encrypt HTTP-01 challenge
         location /.well-known/acme-challenge/ {
             root /var/www/certbot;
         }
-
         location / {
             return 301 https://$host$request_uri;
         }
@@ -21,15 +19,15 @@ http {
 
     # HTTPS vhost
     server {
-        listen 443 ssl http2;
-        listen [::]:443 ssl http2;
-        server_name cloud.cisc.tw;
+        listen 443 ssl;
+        listen [::]:443 ssl;
+        http2 on;
+        server_name __DOMAIN__;
 
-        # TLS certs from certbot
-        ssl_certificate     /etc/letsencrypt/live/cloud.cisc.tw/fullchain.pem;
-        ssl_certificate_key /etc/letsencrypt/live/cloud.cisc.tw/privkey.pem;
+        ssl_certificate     /etc/letsencrypt/live/__DOMAIN__/fullchain.pem;
+        ssl_certificate_key /etc/letsencrypt/live/__DOMAIN__/privkey.pem;
 
-        # (Optional) security & performance
+        # (optional) hardening
         ssl_session_timeout 1d;
         ssl_session_cache shared:MozSSL:10m;
         ssl_protocols TLSv1.2 TLSv1.3;
@@ -40,41 +38,28 @@ http {
         add_header X-Frame-Options "SAMEORIGIN" always;
         add_header X-XSS-Protection "1; mode=block" always;
 
-        # Increase upload/body limits for Nextcloud
         client_max_body_size 2G;
         proxy_read_timeout 3600;
         proxy_send_timeout 3600;
         send_timeout 3600;
 
-        # Real proxying
         location / {
-            proxy_pass http://nextcloud_app:80;
+            proxy_pass http://__UPSTREAM__;
             proxy_http_version 1.1;
+
             proxy_set_header Host              $host;
             proxy_set_header X-Real-IP         $remote_addr;
             proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto https;
+
             proxy_set_header Upgrade           $http_upgrade;
             proxy_set_header Connection        $connection_upgrade;
 
-            # WebDAV (PROPFIND etc.) needs this to pass through without 405s
-            proxy_set_header Depth $http_depth;
-            proxy_request_buffering off;   # helps large uploads
+            proxy_request_buffering off;
         }
 
-        # Let’s Encrypt HTTP-01 through HTTPS (rarely needed, mostly for redirects)
         location /.well-known/acme-challenge/ {
             root /var/www/certbot;
         }
-
-        # Optional: serve robots.txt directly
-        location = /robots.txt {
-            return 200 "User-agent: *\nDisallow: /\n";
-        }
-
-        # Gzip (optional)
-        gzip on;
-        gzip_types text/plain text/css application/javascript application/json application/xml text/xml image/svg+xml;
-        gzip_vary on;
     }
 }
