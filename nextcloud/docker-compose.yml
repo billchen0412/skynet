@@ -1,0 +1,64 @@
+volumes:
+  nextcloud_app:
+  nextcloud_db:
+
+networks:
+  skynet_network:
+    external: true
+
+services:
+  redis:
+    container_name: nextcloud_redis
+    image: redis:alpine
+    restart: always
+    networks:
+      - skynet_network
+
+  db:
+    container_name: nextcloud_db
+    image: mariadb:11.4.7
+    restart: always
+    command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
+    networks:
+      - skynet_network
+    volumes:
+      - nextcloud_db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=94l25KHwfnN6
+      - MYSQL_PASSWORD=96lWK1v3N6Y7
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+
+  app:
+    container_name: nextcloud_app
+    image: nextcloud:31.0.7
+    pull_policy: always
+    restart: always
+    command: |
+      bash -c '
+      /manual_scripts/init.sh &&
+      apache2-foreground'
+    # ports:
+    #   - 80:80
+    #   - 443:443
+    networks:
+      - skynet_network
+    depends_on:
+      - redis
+      - db
+    volumes:
+      - nextcloud_app:/var/www/html
+      - /mnt/btrfs-root/@nextcloud/data:/var/www/html/data
+      - /mnt/btrfs-root/@nextcloud/config:/var/www/html/config
+      - /mnt/btrfs-root/@nextcloud/custom_apps:/var/www/html/custom_apps
+      - ./manual_scripts:/manual_scripts
+    environment:
+      - MYSQL_PASSWORD=96lWK1v3N6Y7
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_HOST=nextcloud_db
+      - NEXTCLOUD_ADMIN_USER=superadmin
+      - NEXTCLOUD_ADMIN_PASSWORD=02eLkZk60G6q
+      - PHP_UPLOAD_LIMIT=10G
+      - PHP_MEMORY_LIMIT=2G
+      - NEXTCLOUD_TRUSTED_DOMAINS=cloud.cisc.tw

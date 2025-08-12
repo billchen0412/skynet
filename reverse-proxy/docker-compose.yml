@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-nextcloud-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - skynet_network
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - letsencrypt:/etc/letsencrypt
+      - certbot-web:/var/www/certbot
+
+  # Run this to obtain/renew certificates (invoke manually or via host cron)
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    networks:
+      - skynet_network
+    volumes:
+      - letsencrypt:/etc/letsencrypt
+      - certbot-web:/var/www/certbot
+    # First-time: replace email + domain below, run once:
+    # docker compose run --rm certbot certonly --webroot -w /var/www/certbot \
+    #   -d cloud.cisc.tw -d cisc.tw --email billchen0412@gmail.com --agree-tos --non-interactive
+    entrypoint: sh
+    command: -c "echo 'Run certbot commands manually as shown in compose comments.' && sleep 3600"
+
+networks:
+  skynet_network:
+    external: true
+
+volumes:
+  letsencrypt:
+  certbot-web:
