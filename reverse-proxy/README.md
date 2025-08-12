@@ -40,3 +40,4 @@ docker compose exec nginx nginx -s reload
 # Twice a day; reload nginx if anything was renewed
 0 0 1 * * docker compose -f /home/hkchen/Codes/skynet/reverse-proxy/docker-compose.yml run --rm certbot renew --webroot -w /var/www/certbot && docker compose -f /home/hkchen/Codes/skynet/reverse-proxy/docker-compose.yml exec nginx nginx -s reload
 ```
+

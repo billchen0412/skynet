@@ -48,6 +48,8 @@ docker compose exec --user www-data app php occ config:system:set redis host --t
 docker compose exec --user www-data app php occ config:system:set redis port --type=integer --value=6379
 docker compose exec --user www-data app php occ config:system:set redis timeout --type=float --value=0.0
 docker compose exec --user www-data app php occ config:system:set memcache.locking --type=string --value='\OC\Memcache\Redis'
+docker compose exec --user www-data app php occ config:system:set default_language --value='zh_TW'
+docker compose exec --user www-data app php occ config:system:set default_locale --value='zh_Hant_TW'
 docker compose exec --user www-data app php occ app:install passwords
 ```
 
@@ -61,11 +63,24 @@ docker compose up -d
 
 
 ## see backgroud task
-```
+```sh
 docker-compose exec --user www-data app php occ background-job:list
 ```
 
 ## add files manully 
-```
+```sh
 docker-compose exec --user www-data app php occ files:scan --path /luke/files
+```
+
+## setup for nginx
+```sh
+docker-compose exec --user www-data app php occ config:system:set overwriteprotocol --value=https
+docker-compose exec --user www-data app php occ config:system:set trusted_proxies 0 --value='172.18.0.5/16'
+docker-compose exec --user www-data app php occ maintenance:repair --include-expensive
+```
+
+## setup for memories
+```sh
+docker-compose exec --user www-data app php occ memories:places-setup
+docker-compose exec --user www-data app php occ memories:index
 ```
