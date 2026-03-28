@@ -31,13 +31,11 @@ services:
 
   app:
     container_name: nextcloud_app
-    image: nextcloud:31.0.7
+    build:
+      context: .
+      dockerfile: Dockerfile
     pull_policy: always
     restart: always
-    command: |
-      bash -c '
-      /manual_scripts/init.sh &&
-      apache2-foreground'
     # ports:
     #   - 80:80
     #   - 443:443

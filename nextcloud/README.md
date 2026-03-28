@@ -84,3 +84,8 @@ docker-compose exec --user www-data app php occ maintenance:repair --include-exp
 docker-compose exec --user www-data app php occ memories:places-setup
 docker-compose exec --user www-data app php occ memories:index
 ```
+
+## open bash shell in container
+```sh
+docker exec -it --user www-data nextcloud_app bash
+```
