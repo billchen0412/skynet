@@ -1,4 +1,4 @@
-FROM nextcloud:31.0.14-apache
+FROM nextcloud:32.0.6-apache
 
 # 安裝工具
 RUN apt-get update && apt-get install -y \
