@@ -92,13 +92,12 @@ docker exec -it --user www-data nextcloud_app bash
 
 ### tutu migration
 ```sh
-docker-compose exec --user www-data app php occ maintenance:mode --on
-docker compose pull app
+docker compose exec --user www-data app php occ maintenance:mode --on
 # docker compose down
-docker compose up -d
-docker-compose exec --user www-data app php occ maintenance:mode --off
+docker compose up -d --build
+docker compose exec --user www-data app php occ maintenance:mode --off
 docker exec -u www-data -it $(docker compose ps -q app) php occ status
 docker compose exec -u www-data app php occ db:add-missing-indices
 docker compose exec -u www-data app php occ maintenance:mimetype:update-js
-docker-compose exec --user www-data app php occ maintenance:repair --include-expensive
+docker compose exec --user www-data app php occ maintenance:repair --include-expensive
 ```
